@@ -42,7 +42,7 @@
   "bindHost": "127.0.0.1",
 
   // The HTTP port to bind the converter to when running as a web service
-  "bindPort": 3000,
+  "bindPort": 80,
 
   // Config for Apple Push notifications, see:
   // https://github.com/node-apn/node-apn/blob/master/doc/provider.markdown
@@ -82,5 +82,11 @@
     "transit.destinationName": "",
     "transit.destinationDate": "",
     "transit.destinationTime": ""
+  },
+  // Authentication service
+  "authentication": {
+    "useWeb": true,
+    "path": "http://localhost:81/test/",
+    "status": 200
   }
 }

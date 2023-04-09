@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * Extended by Salvatorelli Group (2023)
  */
 
 const { Storage } = require('@google-cloud/storage');
@@ -248,14 +250,27 @@ app.get('/image/:name', (req, res) => {
  * Middleware wrapping pass conversion methods. Ensures auth header present,
  * and sets some request variables for the pass conversion to access.
  */
-app.use('/convert/', (req, res, next) => {
-  if (!DEMO && req.headers[config.authHeader] === undefined) {
+app.use('/convert/', async (req, res, next) => {
+  if (!config.authentication.useWeb && !DEMO && req.headers[config.authHeader] === undefined) {
     if (config.authHeader === undefined) {
       console.error('converterAuthHeader config must be defined and set by upstream web server');
     }
     res.status(401).end();
     return;
-  } else if (!req.files) {
+  }
+
+  if (config.authentication.useWeb && req.headers['authorization'] === undefined) {
+    res.status(401).send('401: Not authorized. (No Token Found)');
+    return;
+  } else if (config.authentication.useWeb) {
+    let authHeader = req.headers['authorization'];
+    let responseStatus = await authRequest(authHeader);
+    if (responseStatus !== config.authentication.status) {
+      res.status(401).send(`401: Not authorized. (ASR: ${responseStatus})`)
+    }
+  }
+  
+  if (!req.files) {
     // No files were included in the request
     res.status(400).end();
     return;
@@ -467,6 +482,27 @@ async function convertPassLocal(inputPath, outputPath) {
 }
 
 /**
+ * Authentication request to server 
+ */
+async function authRequest(authorizationHeader) {
+  
+  let requestParams = {
+    'Authorization': authorizationHeader
+  };
+
+  let response = await fetch(config.authentication.path, {
+    method: "POST",
+    body: JSON.stringify(requestParams)
+  });
+
+  try {
+    return response.status;
+  } catch(e) {
+    return 500;
+  }
+}
+
+/**
  * Entrypoint - Handles command-line and Express server invocation
  */
 async function main() {
@@ -478,6 +514,9 @@ async function main() {
     // Express server invocation
     app.listen(config.bindPort, config.bindHost, () => {
       console.log(`Listening on http://${config.bindHost}:${config.bindPort}`);
+      if (config.authentication.useWeb) {
+        console.log(`Using Web Authorization/Authentication. URL: ${config.authentication.path}, Status: ${config.authentication.status}`)
+      }
     });
   }
 }

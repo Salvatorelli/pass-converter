@@ -14,7 +14,7 @@
     "node-cache": "^5.1.2",
     "node-fetch": "^3.2.8",
     "open": "^8.4.0",
-    "sqlite3": "^5.1.2",
+    "sqlite3": "^5.1.6",
     "strip-comments": "^2.0.1",
     "strip-json-trailing-commas": "^1.1.0",
     "tinycolor2": "^1.4.2",
