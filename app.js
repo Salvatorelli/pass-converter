@@ -270,13 +270,34 @@ app.use('/convert/', async (req, res, next) => {
     }
   }
   
-  if (!req.files) {
+  let filePath = req.query[config.remoteFile.queryParamName];
+
+  if (!req.files && (filePath == '' || filePath == undefined) ) {
     // No files were included in the request
-    res.status(400).end();
+    res.status(400).end('400: No Files Included');
     return;
   }
 
-  req.passFile = req.files[Object.keys(req.files)[0]].data;
+  if (!filePath.startsWith(config.remoteFile.domainRestriction)) {
+    res.status(400).send('400: Wrong Domain')
+    return;
+  }
+
+  if (filePath) {
+    let response = await fetch(filePath, {
+      method: "GET",
+    });
+
+    req.passFile = await (await response.blob()).text();
+    console.log(req.passFile)
+  } else {
+    if (config.remoteFile.restrictive) {
+      res.status(400).send('400: Missing filePath')
+      return;
+    }
+    req.passFile = req.files[Object.keys(req.files)[0]].data;
+  }
+
   req.passText = req.passFile.toString();
   req.fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
 

@@ -88,5 +88,10 @@
     "useWeb": true,
     "path": "http://localhost:81/test/",
     "status": 200
+  },
+  "remoteFile": {
+    "restrictive": true,
+    "queryParamName": "filePath",
+    "domainRestriction": "https://sub.domain.tld/passkit"
   }
 }
