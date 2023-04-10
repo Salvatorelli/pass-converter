@@ -76,3 +76,8 @@ node_modules/
 
 # Configuration File
 prod-config.json 
+
+# private
+private/
+private/GServiceAccount.json
+private/*
