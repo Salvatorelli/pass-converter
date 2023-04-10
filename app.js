@@ -294,16 +294,21 @@ app.use('/convert/', async (req, res, next) => {
       method: "GET",
     });
 
-    req.passFile = await (await response.blob()).text();
+    const blob = await response.blob();
+    const text = await blob.text();
+    const arrayBuffer = await blob.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    req.passFile = buffer;
+    req.passText = text;
   } else {
     if (config.remoteFile.restrictive) {
       res.status(400).send('400: Missing filePath')
       return;
     }
     req.passFile = req.files[Object.keys(req.files)[0]].data;
+    req.passText = req.passFile.toString();
   }
 
-  req.passText = req.passFile.toString();
   req.fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
 
   try {
