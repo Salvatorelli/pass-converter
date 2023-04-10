@@ -251,6 +251,11 @@ app.get('/image/:name', (req, res) => {
  * and sets some request variables for the pass conversion to access.
  */
 app.use('/convert/', async (req, res, next) => {
+
+  if (req.query['authorization'] !== undefined) {
+    req.headers['authorization'] = req.query['authorization'];
+  }
+
   if (!config.authentication.useWeb && !DEMO && req.headers[config.authHeader] === undefined) {
     if (config.authHeader === undefined) {
       console.error('converterAuthHeader config must be defined and set by upstream web server');
