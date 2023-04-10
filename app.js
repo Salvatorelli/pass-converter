@@ -272,6 +272,7 @@ app.use('/convert/', async (req, res, next) => {
     let responseStatus = await authRequest(authHeader);
     if (responseStatus !== config.authentication.status) {
       res.status(401).send(`401: Not authorized. (ASR: ${responseStatus})`)
+      return;
     }
   }
   
@@ -279,7 +280,7 @@ app.use('/convert/', async (req, res, next) => {
 
   if (!req.files && (filePath == '' || filePath == undefined) ) {
     // No files were included in the request
-    res.status(400).end('400: No Files Included');
+    res.status(400).send('400: No Files Included');
     return;
   }
 
@@ -294,7 +295,6 @@ app.use('/convert/', async (req, res, next) => {
     });
 
     req.passFile = await (await response.blob()).text();
-    console.log(req.passFile)
   } else {
     if (config.remoteFile.restrictive) {
       res.status(400).send('400: Missing filePath')
@@ -511,14 +511,13 @@ async function convertPassLocal(inputPath, outputPath) {
  * Authentication request to server 
  */
 async function authRequest(authorizationHeader) {
-  
-  let requestParams = {
-    'Authorization': authorizationHeader
-  };
+
 
   let response = await fetch(config.authentication.path, {
     method: "POST",
-    body: JSON.stringify(requestParams)
+    headers: new Headers({
+      'Authorization': authorizationHeader
+    })
   });
 
   try {
