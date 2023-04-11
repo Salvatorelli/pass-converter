@@ -309,7 +309,7 @@ app.use('/convert/', async (req, res, next) => {
     req.passText = req.passFile.toString();
   }
 
-  req.fullUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+  req.fullUrl = `${req.protocol}://${req.get('host')}/`;
 
   try {
     next();
